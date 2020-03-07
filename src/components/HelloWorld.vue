@@ -17,18 +17,30 @@
     >
       Clear Repository
     </v-btn>
-
-    <v-treeview
-      v-if="repository != null"
-      :items="testObject"
-      activatable
-      hoverable
-      item-key="name"
-    >
-      <template slot="label" slot-scope="{ item }">
-        <a @click="loadFile(`${item.name}`)">{{ item.name }}</a>
-      </template>
-    </v-treeview>
+    <v-container class="d-flex">
+      <v-treeview
+        v-if="repository != null"
+        :items="testObject"
+        activatable
+        hoverable
+        class="col-4"
+        item-key="name"
+      >
+        <template slot="label" slot-scope="{ item }">
+          <a @click="loadFile(`${item.name}`)">{{ item.name }}</a>
+        </template>
+      </v-treeview>
+      <v-card v-if="filecontent != null" class="col-8">
+        <v-card-text>
+          <p class="display-1 text--primary">
+            {{ filename }}
+          </p>
+          <div class="text--primary">
+            <p v-html="filecontent"></p>
+          </div>
+        </v-card-text>
+      </v-card>
+    </v-container>
   </v-container>
 </template>
 
@@ -40,6 +52,7 @@ export default {
   data: () => ({
     repository: null,
     subdir: null,
+    filename: null,
     testObject: [
       {
         id: 1,
@@ -47,7 +60,8 @@ export default {
         children: []
       }
     ],
-    loaded: true
+    loaded: true,
+    filecontent: null
   }),
   created() {
     this.$vuetify.theme.dark = true;
@@ -103,8 +117,6 @@ export default {
     },
 
     async loadFile(filename) {
-      console.log(`loadfile called with ${filename}`);
-
       const graphqlWithAuth = graphql.defaults({
         headers: {
           authorization: `bearer 483e772699478b5d98e2d99f2720f96044770d16`
@@ -119,8 +131,10 @@ export default {
         }
       }
     }`);
-
-      console.log(repository);
+      if (filename.split(".").length != 1) {
+        this.filename = filename;
+      }
+      this.filecontent = repository.object.text.replace(/\n/g, "<br/>");
     }
   }
 };
