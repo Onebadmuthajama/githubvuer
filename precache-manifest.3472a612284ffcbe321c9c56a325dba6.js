@@ -120,7 +120,7 @@ self.__precacheManifest = (self.__precacheManifest || []).concat([
     "url": "/githubvuer/img/logo.82b9c7a5.png"
   },
   {
-    "revision": "f77099fe63e0807404c28d067896a9c2",
+    "revision": "0cfce00650819e52862dd8c103206882",
     "url": "/githubvuer/index.html"
   },
   {
@@ -128,8 +128,8 @@ self.__precacheManifest = (self.__precacheManifest || []).concat([
     "url": "/githubvuer/js/about.4672534b.js"
   },
   {
-    "revision": "7e688768ab13976d1954",
-    "url": "/githubvuer/js/app.c5a44e0a.js"
+    "revision": "e8f69acce75b4306e9c2",
+    "url": "/githubvuer/js/app.a1ddfcf5.js"
   },
   {
     "revision": "b905486ab2009514af03",
