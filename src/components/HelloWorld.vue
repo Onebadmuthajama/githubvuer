@@ -11,7 +11,7 @@
     <v-btn
       v-else
       v-on:click="
-        repository = null;
+        resetModelState();
         loaded = !loaded;
       "
     >
@@ -68,28 +68,28 @@ export default {
   },
   methods: {
     // 483e772699478b5d98e2d99f2720f96044770d16
-    async getNextLayer(filename) {
-      if (filename.split(".").length > 1) {
-        await this.loadFile(filename);
-      }
-      const graphqlWithAuth = graphql.defaults({
-        headers: {
-          authorization: `bearer 483e772699478b5d98e2d99f2720f96044770d16`
-        }
-      });
-      const { repository } = await graphqlWithAuth(`{
-          repository(owner: "onebadmuthajama", name: "hellovuejs") {
-            object(expression: "master:${filename}/") {
-              ... on Tree{
-                    entries{
-                      name
-                }
-              }
-            }
-          }
-        }`);
-      this.subdir = repository;
-    },
+    //    async getNextLayer(filename) {
+    //      if (filename.split(".").length > 1) {
+    //        await this.loadFile(filename);
+    //      }
+    //      const graphqlWithAuth = graphql.defaults({
+    //        headers: {
+    //          authorization: `bearer 483e772699478b5d98e2d99f2720f96044770d16`
+    //        }
+    //      });
+    //      const { repository } = await graphqlWithAuth(`{
+    //          repository(owner: "onebadmuthajama", name: "hellovuejs") {
+    //            object(expression: "master:${filename}/") {
+    //              ... on Tree{
+    //                    entries{
+    //                      name
+    //                }
+    //              }
+    //            }
+    //          }
+    //        }`);
+    //      this.subdir = repository;
+    //    },
     async getRepoFiles() {
       const graphqlWithAuth = graphql.defaults({
         headers: {
@@ -112,8 +112,6 @@ export default {
       for (var i = 0; i < repository.object.entries.length; i++) {
         this.testObject[0].children[i] = repository.object.entries[i];
       }
-
-      console.log(this.testObject);
     },
 
     async loadFile(filename) {
@@ -135,6 +133,19 @@ export default {
         this.filename = filename;
       }
       this.filecontent = repository.object.text.replace(/\n/g, "<br/>");
+    },
+    async resetModelState() {
+      this.repository = null;
+      this.testObject = [
+        {
+          id: 1,
+          name: "repository",
+          children: []
+        }
+      ];
+      this.filecontent = null;
+      this.filename = null;
+      this.subdir = null;
     }
   }
 };
