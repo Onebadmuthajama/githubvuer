@@ -50,6 +50,8 @@ export default {
   name: "HelloWorld",
 
   data: () => ({
+    key1: "6b4282865d685",
+    key2: "e4889714aa9cb982ac9710e2a18",
     repository: null,
     subdir: null,
     filename: null,
@@ -67,14 +69,13 @@ export default {
     this.$vuetify.theme.dark = true;
   },
   methods: {
-    // 483e772699478b5d98e2d99f2720f96044770d16
     //    async getNextLayer(filename) {
     //      if (filename.split(".").length > 1) {
     //        await this.loadFile(filename);
     //      }
     //      const graphqlWithAuth = graphql.defaults({
     //        headers: {
-    //          authorization: `bearer 483e772699478b5d98e2d99f2720f96044770d16`
+    //          authorization: `bearer  ${this.key}`
     //        }
     //      });
     //      const { repository } = await graphqlWithAuth(`{
@@ -93,7 +94,7 @@ export default {
     async getRepoFiles() {
       const graphqlWithAuth = graphql.defaults({
         headers: {
-          authorization: `bearer 483e772699478b5d98e2d99f2720f96044770d16`
+          authorization: `bearer ${this.key1 + this.key2}`
         }
       });
       const { repository } = await graphqlWithAuth(`{
@@ -117,7 +118,7 @@ export default {
     async loadFile(filename) {
       const graphqlWithAuth = graphql.defaults({
         headers: {
-          authorization: `bearer 483e772699478b5d98e2d99f2720f96044770d16`
+          authorization: `bearer ${this.key1 + this.key2}`
         }
       });
       const { repository } = await graphqlWithAuth(`{
