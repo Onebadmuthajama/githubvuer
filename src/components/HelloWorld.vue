@@ -21,22 +21,24 @@
       <v-treeview
         v-if="repository != null"
         :items="testObject"
-        activatable
         hoverable
         class="col-4"
         item-key="name"
       >
         <template slot="label" slot-scope="{ item }">
-          <a @click="loadFile(`${item.name}`)">{{ item.name }}</a>
+          <a @click="loadFile(`${item.name}`, `${item.parent}`)">{{
+            item.name
+          }}</a>
         </template>
       </v-treeview>
+
       <v-card v-if="filecontent != null" class="col-8">
         <v-card-text>
           <p class="display-1 text--primary">
             {{ filename }}
           </p>
           <div class="text--primary">
-            <p v-html="filecontent"></p>
+            <p>{{ filecontent }}}}</p>
           </div>
         </v-card-text>
       </v-card>
@@ -53,7 +55,11 @@ export default {
     key1: "6b4282865d685",
     key2: "e4889714aa9cb982ac9710e2a18",
     repository: null,
-    subdir: null,
+    subdir: [
+      {
+        children: []
+      }
+    ],
     filename: null,
     testObject: [
       {
@@ -69,28 +75,27 @@ export default {
     this.$vuetify.theme.dark = true;
   },
   methods: {
-    //    async getNextLayer(filename) {
-    //      if (filename.split(".").length > 1) {
-    //        await this.loadFile(filename);
-    //      }
-    //      const graphqlWithAuth = graphql.defaults({
-    //        headers: {
-    //          authorization: `bearer  ${this.key}`
-    //        }
-    //      });
-    //      const { repository } = await graphqlWithAuth(`{
-    //          repository(owner: "onebadmuthajama", name: "hellovuejs") {
-    //            object(expression: "master:${filename}/") {
-    //              ... on Tree{
-    //                    entries{
-    //                      name
-    //                }
-    //              }
-    //            }
-    //          }
-    //        }`);
-    //      this.subdir = repository;
-    //    },
+    async getNextLayer(folder) {
+      const graphqlWithAuth = graphql.defaults({
+        headers: {
+          authorization: `bearer  ${this.key1 + this.key2}`
+        }
+      });
+      const { repository } = await graphqlWithAuth(`{
+              repository(owner: "onebadmuthajama", name: "hellovuejs") {
+                object(expression: "master:${folder}/") {
+                  ... on Tree{
+                        entries{
+                          name
+                    }
+                  }
+                }
+              }
+            }`);
+      for (var i = 0; i < repository.object.entries.length; i++) {
+        this.subdir[0].children[i] = repository.object.entries[i];
+      }
+    },
     async getRepoFiles() {
       const graphqlWithAuth = graphql.defaults({
         headers: {
@@ -112,16 +117,21 @@ export default {
       this.repository = repository;
       for (var i = 0; i < repository.object.entries.length; i++) {
         this.testObject[0].children[i] = repository.object.entries[i];
+        if (this.testObject[0].children[i].name.split(".").length == 1) {
+          await this.getStructure(this.testObject[0].children[i].name);
+        }
       }
     },
 
-    async loadFile(filename) {
+    async loadFile(filename, parent) {
+      console.log(parent + "/" + filename);
       const graphqlWithAuth = graphql.defaults({
         headers: {
           authorization: `bearer ${this.key1 + this.key2}`
         }
       });
-      const { repository } = await graphqlWithAuth(`{
+      if (parent === null || parent === "undefined") {
+        const { repository } = await graphqlWithAuth(`{
       repository(owner: "onebadmuthajama", name: "hellovuejs") {
         object(expression: "master:${filename}") {
              ... on Blob {
@@ -130,10 +140,47 @@ export default {
         }
       }
     }`);
-      if (filename.split(".").length != 1) {
-        this.filename = filename;
+        if (filename.split(".").length != 1) {
+          if (repository.object != null) {
+            this.filename = filename;
+            this.filecontent = repository.object.text;
+          }
+        }
+      } else {
+        const { repository } = await graphqlWithAuth(`{
+          repository(owner: "onebadmuthajama", name: "hellovuejs") {
+            object(expression: "master:${parent}/${filename}") {
+              ... on Blob {
+                text
+              }
+            }
+          }
+        }`);
+        if (filename.split(".").length != 1) {
+          if (repository.object != null) {
+            this.filename = filename;
+            this.filecontent = repository.object.text;
+          }
+        }
       }
-      this.filecontent = repository.object.text.replace(/\n/g, "<br/>");
+      // await this.getNextLayer(filename);
+      //await this.getStructure(filename);
+    },
+    async getStructure(filename) {
+      for (var i = 0; i < this.testObject[0].children.length; i++) {
+        if (this.testObject[0].children[i].name === filename) {
+          await this.getNextLayer(filename);
+          this.testObject[0].children[i].children = [];
+
+          for (var j = 0; j < this.subdir[0].children.length; j++) {
+            this.testObject[0].children[i].children[j] = {
+              name: `${this.subdir[0].children[j].name}`,
+              parent: `${this.testObject[0].children[i].name}`
+            };
+          }
+          console.log(this.testObject);
+        }
+      }
     },
     async resetModelState() {
       this.repository = null;
@@ -146,7 +193,11 @@ export default {
       ];
       this.filecontent = null;
       this.filename = null;
-      this.subdir = null;
+      this.subdir = [
+        {
+          children: []
+        }
+      ];
     }
   }
 };
