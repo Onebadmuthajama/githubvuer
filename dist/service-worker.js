@@ -14,7 +14,7 @@
 importScripts("https://storage.googleapis.com/workbox-cdn/releases/4.3.1/workbox-sw.js");
 
 importScripts(
-  "/githubvuer/precache-manifest.3472a612284ffcbe321c9c56a325dba6.js"
+  "/precache-manifest.b8ae329f62feb515c6c4b2beebb4551c.js"
 );
 
 workbox.core.setCacheNameDetails({prefix: "githubvuer"});
