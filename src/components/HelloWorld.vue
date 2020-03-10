@@ -18,12 +18,7 @@
       <v-btn @click="validate" :disabled="!valid" v-if="loaded"
         >Load Repository</v-btn
       >
-      <v-btn
-        @click="resetModelState()"
-        :disabled="!valid"
-        v-else
-        loaded="!loaded;"
-      >
+      <v-btn @click="resetModelState()" v-else loaded="!loaded;">
         Clear Repository
       </v-btn>
     </v-form>
