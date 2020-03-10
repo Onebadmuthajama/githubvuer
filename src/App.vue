@@ -24,7 +24,7 @@
       <v-spacer></v-spacer>
     </v-app-bar>
 
-    <v-content>
+    <v-content class="col-12">
       <HelloWorld />
     </v-content>
   </v-app>

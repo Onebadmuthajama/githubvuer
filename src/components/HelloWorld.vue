@@ -1,35 +1,43 @@
 <template>
-  <v-container>
-    <v-btn
-      v-if="loaded"
-      v-on:click="
-        getRepositoryRoot();
-        loaded = !loaded;
-      "
-      >Load Repository</v-btn
-    >
-    <v-btn
-      v-else
-      v-on:click="
-        resetModelState();
-        loaded = !loaded;
-      "
-    >
-      Clear Repository
-    </v-btn>
-    <v-container class="d-flex">
-      <v-treeview
-        v-if="ready"
-        :items="repository[0].children"
-        hoverable
-        class="col-4"
-        item-key="children"
+  <v-container class="d-flex flex-column justify-start col-12">
+    <v-form class="col-4" ref="form" v-model="valid" lazy-validation>
+      <v-text-field
+        v-model="owner"
+        :rules="inputRules"
+        label="Repository Owner"
+        required
+      ></v-text-field>
+
+      <v-text-field
+        v-model="name"
+        :rules="inputRules"
+        label="Repository Name"
+        required
+      ></v-text-field>
+
+      <v-btn @click="validate" :disabled="!valid" v-if="loaded"
+        >Load Repository</v-btn
       >
-        <template slot="label" slot-scope="{ item }">
-          <a @click="itemClick(item.name)">{{ item.name }}</a>
-        </template>
-      </v-treeview>
-    </v-container>
+      <v-btn
+        @click="resetModelState()"
+        :disabled="!valid"
+        v-else
+        loaded="!loaded;"
+      >
+        Clear Repository
+      </v-btn>
+    </v-form>
+    <v-treeview
+      class="col-4"
+      v-if="ready"
+      :items="repository[0].children"
+      hoverable
+      item-key="children"
+    >
+      <template slot="label" slot-scope="{ item }">
+        <a @click="itemClick(item.name)">{{ item.name }}</a>
+      </template>
+    </v-treeview>
   </v-container>
 </template>
 
@@ -41,6 +49,10 @@ export default {
   data: () => ({
     key1: "6b4282865d685",
     key2: "e4889714aa9cb982ac9710e2a18",
+    inputRules: [v => !!v || "Field is required"],
+    owner: "",
+    name: "",
+    valid: false,
     filename: null,
     filecontent: null,
     loaded: true,
@@ -57,7 +69,17 @@ export default {
     this.$vuetify.theme.dark = true;
   },
   methods: {
-    async getNextRepositoryLayer(folder) {
+    validate() {
+      if (this.$refs.form.validate()) {
+        this.getRepositoryRoot();
+        this.loaded = !this.loaded;
+        return true;
+      } else {
+        this.resetModelState();
+        return false;
+      }
+    },
+    async getNextRepositoryLayer(currentRepositoryLayer) {
       const graphqlWithAuth = graphql.defaults({
         headers: {
           authorization: `bearer  ${this.key1 + this.key2}`
@@ -65,7 +87,7 @@ export default {
       });
       const { repository } = await graphqlWithAuth(`{
               repository(owner: "kadenlovell", name: "hellovuejs") {
-                object(expression: "master:${folder}/") {
+                object(expression: "master:${currentRepositoryLayer}/") {
                   ... on Tree{
                         entries{
                           name
@@ -105,6 +127,7 @@ export default {
       console.log(name);
     },
     async resetModelState() {
+      this.loaded = true;
       this.filecontent = null;
       this.filename = null;
       this.ready = false;
