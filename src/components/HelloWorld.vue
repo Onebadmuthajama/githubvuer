@@ -110,13 +110,11 @@ export default {
             }
           }
         }`);
-      console.log(repository.object.entries);
       this.repository.children = [];
       for (var i = 0; i < repository.object.entries.length; i++) {
         this.repository[0].children[i] = repository.object.entries[i];
       }
       this.ready = true;
-      console.log(this.repository[0]);
     },
     async itemClick(name) {
       console.log(name);
